@@ -1,0 +1,36 @@
+name: build
+on: [push, workflow_dispatch]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unzip project
+        run: unzip -q stacked-entities.zip
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 9.2.0
+
+      - name: Build
+        working-directory: stacked-entities
+        run: gradle build
+
+      - name: Publish jar to Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          JAR=$(ls stacked-entities/build/libs/*.jar | grep -v sources | head -1)
+          gh release create "build-${{ github.run_number }}" "$JAR" \
+            --title "Stacked Entities build ${{ github.run_number }}" \
+            --notes "Automatic build"

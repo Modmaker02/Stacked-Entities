@@ -24,7 +24,12 @@ jobs:
 
       - name: Build
         working-directory: stacked-entities
-        run: gradle build
+        run: gradle build --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stacked-entities-jar
+          path: stacked-entities/build/libs/*.jar
 
       - name: Publish jar to Releases
         env:
